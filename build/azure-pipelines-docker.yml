@@ -1,0 +1,28 @@
+jobs:
+#-------------------------------------------------------------------------
+- job: ICU4C_Docker_Ubuntu_2004
+  displayName: 'C: MakeDist (Ubuntu 20.04)'
+  timeoutInMinutes: 30
+  pool:
+    vmImage: 'ubuntu-18.04'
+  steps:
+    - checkout: self
+      lfs: true
+      fetchDepth: 1
+    - task: Docker@2
+      displayName: 'Build docker container'
+      inputs:
+        command: build
+        Dockerfile: 'build/dockerfiles/ubuntu-focal/Dockerfile'
+        arguments: -t ms-icu-container
+    - script: |
+        mkdir /tmp/build-output && docker run --rm -v $(pwd):/src -v /tmp/build-output:/dist ms-icu-container /src/build/build.sh
+      displayName: 'Build, test, and make install'
+    - script: |
+        cd /tmp/build-output && ls -Rl
+      displayName: 'Directory listing'
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifacts'
+      inputs:
+        PathtoPublish: '/tmp/build-output/icu-binaries.tar.gz'
+        ArtifactName: '$(Build.BuildNumber)_icu-binaries.tar.gz'
