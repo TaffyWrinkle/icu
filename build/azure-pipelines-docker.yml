@@ -26,6 +26,14 @@ jobs:
         arguments: -t ms-icu-container
 
     - script: |
+        docker images dotnet-buildtools/prereqs
+      displayName: 'DIAG: docker'
+
+    - script: |
+        docker image inspect --format='' centos-7-359e48e-20200313130914
+      displayName: 'DIAG: docker'
+
+    - script: |
         mkdir /tmp/build-output && docker run --rm -v $(pwd):/src -v /tmp/build-output:/dist ms-icu-container /src/build/build.sh
       displayName: 'Build, test, and make install'
 
